@@ -1,0 +1,14 @@
+{
+  "name": "react-native-reverse-proxy",
+  "version": "1.0.0",
+  "description": "Embedded simple reverse proxy for React Native",
+  "main": "src/index",
+  "author": "Zen <96865086+luo3house@users.noreply.github.com>",
+  "license": "MIT",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "module-legacy",
+    "languages": "kotlin-swift",
+    "version": "0.41.2"
+  }
+}
