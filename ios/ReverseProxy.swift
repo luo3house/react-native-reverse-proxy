@@ -47,7 +47,7 @@ class ReverseProxy: NSObject {
     }
 }
 
-class ServerInstance {
+public class ServerInstance {
     let port: Int;
     let origin: String;
     let xHeaders: [String: String];
@@ -87,14 +87,15 @@ class ServerInstance {
     }
 }
 
-final class RNRPHandler: NSObject, Sendable, HTTPHandler, URLSessionDelegate {
+@objc
+public final class RNRPHandler: NSObject, Sendable, HTTPHandler, URLSessionDelegate { 
     let origin: String
     let xHeaders: [String: String]
     init(origin: String, xHeaders: [String: String]) {
         self.origin = origin
         self.xHeaders = xHeaders
     }
-    func handleRequest(_ request: HTTPRequest) async throws -> HTTPResponse {
+    public func handleRequest(_ request: HTTPRequest) async throws -> HTTPResponse {
         let reqHeaders = request.headers
         for (k, v) in xHeaders {
             if (reqHeaders[HTTPHeader(k)] != v) {
@@ -104,6 +105,13 @@ final class RNRPHandler: NSObject, Sendable, HTTPHandler, URLSessionDelegate {
                 )
             }
         }
-        return try await ProxyHTTPHandler(base: origin).handleRequest(request)
+        return try await ProxyHTTPHandler(
+            base: origin,
+            session: URLSession(
+                configuration: .default,
+                delegate: self,
+                delegateQueue: nil
+            )
+        ).handleRequest(request)
     }
 }
