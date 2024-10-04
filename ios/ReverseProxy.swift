@@ -26,8 +26,7 @@ class ReverseProxy: NSObject {
         }
         Task {
             do {
-                try await svc!.start()
-                resolve(nil)
+                resolve(try await svc!.start())
             } catch let err {
                 pool.removeValue(forKey: key)
                 reject("1", err.localizedDescription, err)
@@ -60,7 +59,7 @@ public class ServerInstance {
         self.xHeaders = xHeaders
     }
     
-    func start() async throws {
+    func start() async throws -> Int {
         if (self.server != nil || self.task != nil) {
             throw NSError(domain: "server is running", code: 1)
         }
@@ -72,6 +71,16 @@ public class ServerInstance {
         do {
             self.task = Task { try await server.start() }
             try await server.waitUntilListening()
+            let addr = await server.listeningAddress
+            switch addr {
+            case let .ip4(addr, port: port):
+                return Int(port)
+            case let .ip6(addr, port: port):
+                return Int(port)
+            case .none: break
+            case .some(.unix(_)): break
+            }
+            return self.port
         } catch let err {
             self.server = nil
             self.task = nil
@@ -88,7 +97,9 @@ public class ServerInstance {
 }
 
 @objc
-public final class RNRPHandler: NSObject, Sendable, HTTPHandler, URLSessionDelegate { 
+public final class RNRPHandler: NSObject, Sendable, HTTPHandler, URLSessionDelegate {
+    static var session: URLSession?;
+    
     let origin: String
     let xHeaders: [String: String]
     init(origin: String, xHeaders: [String: String]) {
@@ -107,7 +118,7 @@ public final class RNRPHandler: NSObject, Sendable, HTTPHandler, URLSessionDeleg
         }
         return try await ProxyHTTPHandler(
             base: origin,
-            session: URLSession(
+            session: RNRPHandler.session ?? URLSession(
                 configuration: .default,
                 delegate: self,
                 delegateQueue: nil

@@ -12,6 +12,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.DataInputStream
+import java.net.ServerSocket
 
 class ReverseProxyModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -43,8 +44,7 @@ class ReverseProxyModule(reactContext: ReactApplicationContext) :
       var svc = pool.get(key)
       if (svc == null) pool.put(key, ServerInstance(port, origin, xHeaders).also { svc = it })
       try {
-        svc!!.start()
-        promise.resolve(port)
+        promise.resolve(svc!!.start())
       } catch (e: Throwable) {
         e.printStackTrace()
         promise.reject(e)
@@ -78,13 +78,23 @@ open class ServerInstance(
   val origin: String,
   val xHeaders: Map<String, String>
 ) {
+  companion object {
+    fun randomPort(): Int {
+      return ServerSocket(0).let {
+        val port = it.localPort
+        it.close()
+        port
+      }
+    }
+  }
   private var server: NanoHTTPD? = null
 
   fun start(): Int {
     synchronized(this) {
       assert(server == null)
-      val port = port.also {
-      server = object : NanoHTTPD(it) {
+      return run {
+        val port = if (this.port == 0) randomPort() else this.port
+        object : NanoHTTPD(port) {
           init { start(10_000, false) }
           override fun serve(req: IHTTPSession): Response {
             val reqContentType = req.headers["content-type"]
@@ -129,9 +139,9 @@ open class ServerInstance(
               }
             }
           }
-        }
+        }.also { server = it }
+        port
       }
-      return port
     }
   }
 

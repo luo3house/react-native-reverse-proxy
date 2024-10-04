@@ -20,9 +20,9 @@ const ReverseProxy = NativeModules.ReverseProxy
 /**
  * Start a reverse proxy with options
  * @param req
- * @returns noop
+ * @returns {number} port of server
  */
-function start(req: RNRPStartReq): Promise<void> {
+function start(req: RNRPStartReq): Promise<number> {
   return ReverseProxy.start(req)
 }
 
@@ -43,7 +43,7 @@ export type RNRPHeaders = {
 export type RNRPStartReq = Partial<RNRPHeaders> & {
   /** The unique literal key to recognize your proxy from map */
   key: string
-  /** The port of proxy server */
+  /** The port of proxy server, or replys with random port if u give 0 */
   port: number
   /** The target origin to override */
   origin: string
