@@ -49,7 +49,7 @@ def supportsNamespace() {
 
 android {
   if (supportsNamespace()) {
-    namespace "com.reverseproxy"
+    namespace "io.github.luo3house.rnrp"
 
     sourceSets {
       main {

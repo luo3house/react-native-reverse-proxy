@@ -1,4 +1,4 @@
-package com.reverseproxy
+package io.github.luo3house.rnrp
 
 import com.facebook.react.ReactPackage
 import com.facebook.react.bridge.NativeModule

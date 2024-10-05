@@ -1,4 +1,4 @@
-package com.reverseproxy
+package io.github.luo3house.rnrp
 
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext

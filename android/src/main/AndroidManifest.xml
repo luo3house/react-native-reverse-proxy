@@ -1,3 +1,3 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.reverseproxy">
+          package="io.github.luo3house.rnrp">
 </manifest>
